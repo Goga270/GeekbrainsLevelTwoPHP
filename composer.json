@@ -1,0 +1,15 @@
+{
+    "name": "george/php",
+    "autoload": {
+        "psr-4": {
+            "George\\Php\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Goga270",
+            "email": "90174259+Goga270@users.noreply.github.com"
+        }
+    ],
+    "require": {}
+}
