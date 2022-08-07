@@ -46,11 +46,11 @@ function main($type){
     }
 }
 
-//echo "USERS".PHP_EOL;
-//$user1 = new Person();
-//echo $user1.PHP_EOL;
-//$user2 = new George\Lesson1\Blog\Person\Person(2, "George", "Aladin");
-//echo $user2.PHP_EOL.PHP_EOL;
+echo "USERS".PHP_EOL;
+$user1 = new Person();
+echo $user1.PHP_EOL;
+$user2 = new George\Lesson1\Blog\Person\Person(2, "George", "Aladin");
+echo $user2.PHP_EOL.PHP_EOL;
 //
 //echo "ARTICLES".PHP_EOL;
 //$article1 = new Article();
