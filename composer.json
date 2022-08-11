@@ -11,5 +11,7 @@
             "email": "90174259+Goga270@users.noreply.github.com"
         }
     ],
-    "require": {}
+    "require": {
+      "ext-pdo": "*"
+    }
 }
