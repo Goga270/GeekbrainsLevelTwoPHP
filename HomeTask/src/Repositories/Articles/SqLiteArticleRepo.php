@@ -6,6 +6,7 @@ use George\HomeTask\Blog\Article\Article;
 use George\HomeTask\Blog\User\User;
 use George\HomeTask\Common\Name;
 use George\HomeTask\Common\UUID;
+use George\HomeTask\Exceptions\ArticleNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use PDO;
 use PDOStatement;
@@ -85,13 +86,13 @@ class SqLiteArticleRepo implements ArticlesRepositoryInterface
 
     /**
      * @throws \George\HomeTask\Exceptions\InvalidArgumentException
-     * @throws UserNotFoundException
+     * @throws ArticleNotFoundException
      */
     private function getArticle(PDOStatement $statement, string $title): Article
     {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         if (false === $result) {
-            throw new UserNotFoundException(
+            throw new ArticleNotFoundException(
                 "Cannot find article: $title"
             );
         }

@@ -5,6 +5,7 @@ namespace George\HomeTask\Repositories\Users;
 use George\HomeTask\Blog\User\User;
 use George\HomeTask\Common\Name;
 use George\HomeTask\Common\UUID;
+use George\HomeTask\Exceptions\InvalidArgumentException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use PDO;
 use PDOStatement;
@@ -36,7 +37,7 @@ class SqLiteUserRepo implements UsersRepositoryInterface
     }
 
     /**
-     * @throws \George\HomeTask\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function get(UUID $id):User{
         $statement = $this->connection->prepare(
@@ -49,7 +50,7 @@ class SqLiteUserRepo implements UsersRepositoryInterface
     }
 
     /**
-     * @throws \George\HomeTask\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getByUsername(string $username): User
     {
@@ -65,7 +66,7 @@ class SqLiteUserRepo implements UsersRepositoryInterface
     // Вынесли общую логику в отдельный приватный метод
 
     /**
-     * @throws \George\HomeTask\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException|UserNotFoundException
      */
     private function getUser(PDOStatement $statement, string $username): User
     {
