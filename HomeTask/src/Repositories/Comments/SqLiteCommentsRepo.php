@@ -4,6 +4,7 @@ namespace George\HomeTask\Repositories\Comments;
 
 use George\HomeTask\Blog\Comment\Comment;
 use George\HomeTask\Common\UUID;
+use George\HomeTask\Exceptions\CommentNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use PDO;
 use PDOStatement;
@@ -87,7 +88,7 @@ class SqLiteCommentsRepo implements CommentsRepositiryInterface {
     {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         if (false === $result) {
-            throw new UserNotFoundException(
+            throw new CommentNotFoundException(
                 "Cannot find comment: $id"
             );
         }

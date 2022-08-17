@@ -41,7 +41,7 @@ try{
         $article = $articleDbRepo->getByTitle('IgorLox');
         $createComment = new CreateCommentCommand($commentDbRepo);
         //$createComment->handle($arguments,$user->getId(), $article->getId());
-
+        print_r($article);
 
     }
 }catch (AppException $e){
