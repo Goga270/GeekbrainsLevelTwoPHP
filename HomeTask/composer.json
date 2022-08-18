@@ -19,7 +19,9 @@
         "phpunit/phpunit": "^9.5"
     },
     "scripts": {
-        "test": "phpunit tests --testdox --colors"
+        "test": "phpunit tests --testdox --colors",
+        "http-server": "php -S 127.0.0.1:8000 http.php",
+        "test-coverage": "php -dxdebug.mode=coverage vendor/bin/phpunit tests --coverage-html coverage_report --coverage-filter src"
     }
 
 }
