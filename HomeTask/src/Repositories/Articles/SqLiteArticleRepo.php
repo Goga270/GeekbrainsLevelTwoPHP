@@ -99,4 +99,12 @@ class SqLiteArticleRepo implements ArticlesRepositoryInterface
         // Создаём объект пользователя с полем username
         return new Article(new UUID($result['uuid']), new UUID($result['authorUuid']), $result['title'], $result['text']);
     }
+
+    public function deleteById(UUID $id){
+        $statement = $this->connection->prepare('DELETE FROM articles WHERE uuid = :id');
+
+        $statement->execute([
+            ':id' => (string)$id,
+        ]);
+    }
 }

@@ -12,4 +12,5 @@ interface ArticlesRepositoryInterface
     public function get(UUID $uuid): Article;
     public function getByTitle(string $title): Article;
     public function getByAuthor(UUID $id):Article;
+    public function deleteById(UUID $id);
 }

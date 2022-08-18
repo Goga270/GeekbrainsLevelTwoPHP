@@ -12,6 +12,8 @@
         }
     ],
     "require": {
+      "ext-http": "*",
+      "ext-mbstring": "*",
       "ext-pdo": "*"
     }
 }
