@@ -8,6 +8,8 @@ use George\HomeTask\Http\Actions\ArticleAction\DeleteArticleById;
 use George\HomeTask\Http\Actions\ArticleAction\FindArticleById;
 use George\HomeTask\Http\Actions\CommentAction\CreateComment;
 use George\HomeTask\Http\Actions\CommentAction\FindCommentById;
+use George\HomeTask\Http\Actions\LikeAction\CreateLike;
+use George\HomeTask\Http\Actions\LikeAction\FindLikesByArticle;
 use George\HomeTask\Http\Actions\UserAction\CreateUser;
 use George\HomeTask\Http\Actions\UserAction\FindByUsername;
 use George\HomeTask\Http\ErorrResponse;
@@ -20,6 +22,7 @@ use George\HomeTask\Repositories\Users\SqLiteUserRepo;
 http_response_code(200);
 
 $request = new Request($_GET, $_SERVER, file_get_contents("php://input"));
+$container = require_once __DIR__.'/bootstrap.php';
 
 try {
     $path = $request->path();
@@ -44,32 +47,20 @@ $routes = [
 // для отделения маршрутов,
 // применяемых к запросам с разными методами
     'GET' => [
-        '/show/user' => new FindByUsername(
-            new SqLiteUserRepo($con)
-        ),
-        '/show/article' => new FindArticleById(
-            new SqLiteArticleRepo($con)
-        ),
-        '/show/comment' => new FindCommentById(
-            new SqLiteCommentsRepo($con)
-        )
+        '/show/user' => FindByUsername::class,
+        '/show/article' =>FindArticleById::class,
+        '/show/comment' =>FindCommentById::class,
+        '/show/ArticleLikes' => FindLikesByArticle::class
     ],
     'POST' => [
         // Добавили новый маршрут
-        '/create/user' => new CreateUser(
-            new SqLiteUserRepo($con)
-        ),
-        '/create/article' => new CreateArticle(
-            new SqLiteArticleRepo($con), new SqLiteUserRepo($con)
-        ),
-        '/create/comment' => new CreateComment(
-            new SqLiteCommentsRepo($con)
-        )
+        '/create/user' => CreateUser::class,
+        '/create/article' => CreateArticle::class,
+        '/create/comment' => CreateComment::class,
+        '/create/like' => CreateLike::class
     ],
     'DELETE' => [
-        '/delete/article' => new DeleteArticleById(
-            new SqLiteArticleRepo($con)
-        )
+        '/delete/article' => DeleteArticleById::class
     ]
 ];
 
@@ -87,7 +78,9 @@ if (!array_key_exists($path, $routes[$method])) {
 }
 
 // Выбираем действие по методу и пути
-$action = $routes[$method][$path];
+$actionClassName = $routes[$method][$path];
+
+$action = $container->get($actionClassName);
 
 try {
     $response = $action->handle($request);
