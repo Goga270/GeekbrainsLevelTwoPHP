@@ -3,28 +3,36 @@
 namespace George\HomeTask\Repositories\Likes;
 
 use George\HomeTask\Blog\Article\Article;
+use George\HomeTask\Blog\Like\ArticleLike;
 use George\HomeTask\Blog\Like\Like;
 use George\HomeTask\Blog\User\User;
 use George\HomeTask\Common\UUID;
+use George\HomeTask\Exceptions\InvalidArgumentException;
+use George\HomeTask\Exceptions\LikeExsistException;
 use George\HomeTask\Exceptions\LikeNotFoundException;
 use PDO;
 use PDOStatement;
+use PHPUnit\Util\Exception;
+use Psr\Log\LoggerInterface;
 
-class SqLiteLikesRepo implements LikesRepositoryInterface
+class SqLiteArticleLikesRepo
 {
-
     private PDO $connection;
+    private LoggerInterface $logger;
 
     /**
      * @param PDO $connection
+     * @param LoggerInterface $logger
      */
-    public function __construct(PDO $connection)
+    public function __construct(PDO $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
+        $this->logger = $logger;
     }
 
     public function save(Like $like): void
     {
+        $this->logger->info("Started saving the article like to database");
         // Добавили поле username в запрос
         $statement = $this->connection->prepare(
             'INSERT INTO article_likes (uuid, articleUuid, userUuid)
@@ -37,7 +45,11 @@ class SqLiteLikesRepo implements LikesRepositoryInterface
         ]);
     }
 
-    public function get(UUID $uuid): Like
+    /**
+     * @throws LikeNotFoundException
+     * @throws InvalidArgumentException
+     */
+    public function get(UUID $uuid): ArticleLike
     {
         $statement = $this->connection->prepare(
             'SELECT * FROM article_likes WHERE uuid = :uuid'
@@ -79,16 +91,21 @@ class SqLiteLikesRepo implements LikesRepositoryInterface
         return $this->getAllLikes($statement);
     }
 
-    private function getLike(PDOStatement $statement, string $id): Like
+    /**
+     * @throws LikeNotFoundException
+     * @throws InvalidArgumentException
+     */
+    private function getLike(PDOStatement $statement, string $id): ArticleLike
     {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         if (false === $result) {
+            $this->logger->warning("Cannot find the article like by $id");
             throw new LikeNotFoundException(
                 "Cannot find like: $id"
             );
         }
         // Создаём объект пользователя с полем username
-        return new Like(new UUID($result['uuid']), new UUID($result['articleUuid']), new UUID($result['userUuid']));
+        return new ArticleLike(new UUID($result['uuid']), new UUID($result['articleUuid']), new UUID($result['userUuid']));
     }
 
     private function getAllLikes(PDOStatement $statement): iterable
@@ -103,8 +120,23 @@ class SqLiteLikesRepo implements LikesRepositoryInterface
         return $likes;
     }
 
+    /**
+     * @throws LikeExsistException
+     */
     public function likeExist(Article $article, User $user): void
     {
+        $statement = $this->connection->prepare(
+            'SELECT * FROM article_likes WHERE articleUuid = :articleUuid AND userUuid = :userUuid'
+        );
+        $statement->execute([
+            ':articleUuid' => (string)$article->getId(),
+            ':userUuid' => (string)$user->getId()
+        ]);
 
+        $isExisted = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if($isExisted){
+            throw new LikeExsistException("The users like for this post already exist");
+        }
     }
 }

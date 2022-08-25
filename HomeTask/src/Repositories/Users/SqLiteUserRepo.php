@@ -9,21 +9,26 @@ use George\HomeTask\Exceptions\InvalidArgumentException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqLiteUserRepo implements UsersRepositoryInterface
 {
     //Поле где хранится конект к базе данных с данными.
     private PDO $connection;
+    private LoggerInterface $logger;
 
     /**
      * @param PDO $connection
+     * @param LoggerInterface $logger
      */
-    public function __construct(PDO $connection)
+    public function __construct(PDO $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
+        $this->logger = $logger;
     }
     //метод сохранения данных в базу данных, получаем объект класса User/
     public function save(User $user):void{
+        $this->logger->info("Started saving the user to database");
         // Добавили поле username в запрос
         $statement = $this->connection->prepare(
             'INSERT INTO users (uuid, username, first_name, last_name)
@@ -72,6 +77,7 @@ class SqLiteUserRepo implements UsersRepositoryInterface
     {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         if (false === $result) {
+            $this->logger->warning("Cannot find the user by $username");
             throw new UserNotFoundException(
                 "Cannot find user: $username"
             );

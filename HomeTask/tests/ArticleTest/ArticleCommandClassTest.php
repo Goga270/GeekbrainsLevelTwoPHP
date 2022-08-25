@@ -6,13 +6,15 @@ use George\HomeTask\Common\Arguments;
 use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\ArgumentsException;
 use George\HomeTask\Exceptions\CommandException;
+use George\HomeTask\Repositories\Articles\ArticlesRepositoryInterface;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class ArticleCommandClassTest extends TestCase
 {
     private function getRepo()
     {
-        return new class implements \George\HomeTask\Repositories\Articles\ArticlesRepositoryInterface {
+        return new class implements ArticlesRepositoryInterface {
             private bool $callback = false;
             public function save(Article $article): void
             {
@@ -39,6 +41,11 @@ class ArticleCommandClassTest extends TestCase
             {
                 // TODO: Implement get() method.
             }
+
+            public function deleteById(UUID $id)
+            {
+                // TODO: Implement deleteById() method.
+            }
         };
     }
 
@@ -52,7 +59,7 @@ class ArticleCommandClassTest extends TestCase
 
         $obj = $this->getRepo();
 
-        $userCom = new CreateArticleCommand($obj);
+        $userCom = new CreateArticleCommand($obj, new DummyLogger());
 
         $userCom->handle(
             new Arguments([

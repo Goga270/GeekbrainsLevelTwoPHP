@@ -9,6 +9,7 @@ use George\HomeTask\Http\ErorrResponse;
 use George\HomeTask\Http\Request;
 use George\HomeTask\Http\SuccessResponse;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class FindByUsernameActionTest extends TestCase
@@ -30,7 +31,7 @@ class FindByUsernameActionTest extends TestCase
         // Создаём стаб репозитория пользователей
         $usersRepository = $this->usersRepository([]);
         //Создаём объект действия
-        $action = new FindByUsername($usersRepository);
+        $action = new FindByUsername($usersRepository, new DummyLogger());
         // Запускаем действие
         $response = $action->handle($request);
         // Проверяем, что ответ - неудачный
@@ -54,7 +55,7 @@ class FindByUsernameActionTest extends TestCase
         $request = new Request(['username' => 'ivan'], [], "");
         // Репозиторий пользователей по-прежнему пуст
         $usersRepository = $this->usersRepository([]);
-        $action = new FindByUsername($usersRepository);
+        $action = new FindByUsername($usersRepository, new DummyLogger());
         $response = $action->handle($request);
         $this->assertInstanceOf(ErorrResponse::class, $response);
         $this->expectOutputString('{"success":false,"reason":"Not found"}');
@@ -78,7 +79,7 @@ class FindByUsernameActionTest extends TestCase
         UUID::random(),
         'ivan',
         new Name('Ivan', 'Nikitin')),]);
-        $action = new FindByUsername($usersRepository);
+        $action = new FindByUsername($usersRepository, new DummyLogger());
         $response = $action->handle($request);
         // Проверяем, что ответ - удачный
         $this->assertInstanceOf(SuccessResponse::class, $response);

@@ -5,6 +5,7 @@ use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\CommentNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Repositories\Comments\SqLiteCommentsRepo;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class CommentRepoTest extends TestCase
@@ -22,7 +23,7 @@ class CommentRepoTest extends TestCase
                 ':text' => "text"]
         )->willReturn(true);
 
-        $sqlRepo = new SqLiteCommentsRepo($connectionMock);
+        $sqlRepo = new SqLiteCommentsRepo($connectionMock, new DummyLogger());
         // Свойства пользователя точно такие,как и в описании мока
         $sqlRepo->save(new Comment(
             new UUID("123e4567-e89b-12d3-a456-426614174000"),
@@ -46,7 +47,7 @@ class CommentRepoTest extends TestCase
         );
         $statementMock->method('fetch')->willReturn(false);
 
-        $sqlRepo=new SqLiteCommentsRepo($connectionMock);
+        $sqlRepo=new SqLiteCommentsRepo($connectionMock, new DummyLogger());
 
         $this->expectException(CommentNotFoundException::class);
         $this->expectExceptionMessage("Cannot find comment: 123e4567-e89b-12d3-a456-426614174000");
@@ -71,7 +72,7 @@ class CommentRepoTest extends TestCase
             'text'=> 'text'
         ]);
 
-        $sqlRepo=new SqLiteCommentsRepo($connectionMock);
+        $sqlRepo=new SqLiteCommentsRepo($connectionMock, new DummyLogger());
 
         $user = new Comment(
             new UUID("123e4567-e89b-12d3-a456-426614174000"),
@@ -101,7 +102,7 @@ class CommentRepoTest extends TestCase
             'text'=> 'text'
         ]);
 
-        $sqlRepo=new SqLiteCommentsRepo($connectionMock);
+        $sqlRepo=new SqLiteCommentsRepo($connectionMock, new DummyLogger());
 
         $user = new Comment(
             new UUID("123e4567-e89b-12d3-a456-426614174000"),

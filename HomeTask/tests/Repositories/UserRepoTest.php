@@ -5,6 +5,7 @@ use George\HomeTask\Common\Name;
 use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Repositories\Users\SqLiteUserRepo;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class UserRepoTest extends TestCase
@@ -22,7 +23,7 @@ class UserRepoTest extends TestCase
             ':last_name' => 'Nikitin',
         ])->willReturn(true);
 
-        $sqlRepo = new SqLiteUserRepo($connectionMock);
+        $sqlRepo = new SqLiteUserRepo($connectionMock, new DummyLogger());
         // Свойства пользователя точно такие,как и в описании мока
         $sqlRepo->save(new User(
             new UUID('123e4567-e89b-12d3-a456-426614174000'),
@@ -46,7 +47,7 @@ class UserRepoTest extends TestCase
         );
         $statementMock->method('fetch')->willReturn(false);
 
-        $sqlRepo=new SqLiteUserRepo($connectionMock);
+        $sqlRepo=new SqLiteUserRepo($connectionMock, new DummyLogger());
 
         $this->expectException(UserNotFoundException::class);
         $this->expectExceptionMessage("Cannot find user: 123e4567-e89b-12d3-a456-426614174000");
@@ -74,7 +75,7 @@ class UserRepoTest extends TestCase
             'last_name'=> 'Nikitin'
             ]);
 
-        $sqlRepo=new SqLiteUserRepo($connectionMock);
+        $sqlRepo=new SqLiteUserRepo($connectionMock, new DummyLogger());
 
         $user = new User(new UUID('123e4567-e89b-12d3-a456-426614174000'), 'ivan228', new Name('Ivan', 'Nikitin'));
 

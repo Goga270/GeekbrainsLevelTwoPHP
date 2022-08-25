@@ -7,15 +7,35 @@ use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\ArticleNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Http\Actions\ArticleAction\CreateArticle;
+use George\HomeTask\Http\Auth\IdentificationInterface;
+use George\HomeTask\Http\Auth\JsonBodyUuidIdentification;
 use George\HomeTask\Http\ErorrResponse;
 use George\HomeTask\Http\Request;
 use George\HomeTask\Http\SuccessResponse;
 use George\HomeTask\Repositories\Articles\ArticlesRepositoryInterface;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class CreateArticleTest extends TestCase
 {
+    /*private function jsonIdentification(array $users): IdentificationInterface{
+        return new class($users) implements IdentificationInterface{
+            public function __construct(
+                private array $users
+            ) {}
+            public function user(Request $request): User
+            {
+                if(empty($users)){
+                    throw new UserNotFoundException("Not found");
+                }else{
+                    return $users[0];
+                }
+            }
+        };
+
+    }*/
+
     private function usersRepository(array $users): UsersRepositoryInterface
     {
 // В конструктор анонимного класса передаём массив пользователей
@@ -94,10 +114,10 @@ class CreateArticleTest extends TestCase
      */
     public function testItReturnsErrorResponseIfGetBadUuid(){
         $request = new Request([], [], '{"authorId": "12"}');
-        $usersRepository = $this->usersRepository([]);
+        $jsonIdentification = new JsonBodyUuidIdentification($this->usersRepository([]));
         $articleRepository = $this->articlesRepository([]);
 
-        $action = new CreateArticle($articleRepository, $usersRepository);
+        $action = new CreateArticle($articleRepository, $jsonIdentification, new DummyLogger());
 
         $response = $action->handle($request);
         //$this->assertInstanceOf(\George\HomeTask\Exceptions\InvalidArgumentException::class, $response);
@@ -123,8 +143,8 @@ class CreateArticleTest extends TestCase
             'ivan',
             new Name('Ivan', 'Nikitin')),]);
         $articleRepository = $this->articlesRepository([]);
-
-        $action = new CreateArticle($articleRepository, $usersRepository);
+        $jsonIdentification = new JsonBodyUuidIdentification($usersRepository);
+        $action = new CreateArticle($articleRepository, $jsonIdentification, new DummyLogger());
 
         $response = $action->handle($request);
         //$this->assertInstanceOf(\George\HomeTask\Exceptions\InvalidArgumentException::class, $response);
@@ -151,8 +171,8 @@ class CreateArticleTest extends TestCase
             'ivan',
             new Name('Ivan', 'Nikitin')),]);
         $articleRepository = $this->articlesRepository([]);
-
-        $action = new CreateArticle($articleRepository, $usersRepository);
+        $jsonIdentification = new JsonBodyUuidIdentification($usersRepository);
+        $action = new CreateArticle($articleRepository, $jsonIdentification, new DummyLogger());
 
         $response = $action->handle($request);
         //$this->assertInstanceOf(\George\HomeTask\Exceptions\InvalidArgumentException::class, $response);
@@ -178,8 +198,8 @@ class CreateArticleTest extends TestCase
             'ivan',
             new Name('Ivan', 'Nikitin')),]);
         $articleRepository = $this->articlesRepository([]);
-
-        $action = new CreateArticle($articleRepository, $usersRepository);
+        $jsonIdentification = new JsonBodyUuidIdentification($usersRepository);
+        $action = new CreateArticle($articleRepository, $jsonIdentification, new DummyLogger());
 
         $response = $action->handle($request);
         //$this->assertInstanceOf(\George\HomeTask\Exceptions\InvalidArgumentException::class, $response);
@@ -206,8 +226,8 @@ class CreateArticleTest extends TestCase
             'ivan',
             new Name('Ivan', 'Nikitin')),]);
         $articleRepository = $this->articlesRepository([]);
-
-        $action = new CreateArticle($articleRepository, $usersRepository);
+        $jsonIdentification = new JsonBodyUuidIdentification($usersRepository);
+        $action = new CreateArticle($articleRepository, $jsonIdentification, new DummyLogger());
 
         $response = $action->handle($request);
         //$this->assertInstanceOf(\George\HomeTask\Exceptions\InvalidArgumentException::class, $response);

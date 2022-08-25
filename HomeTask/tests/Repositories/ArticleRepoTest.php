@@ -5,6 +5,7 @@ use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\ArticleNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Repositories\Articles\SqLiteArticleRepo;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class ArticleRepoTest extends TestCase
@@ -22,7 +23,7 @@ class ArticleRepoTest extends TestCase
             ':text' =>"text" ]
         )->willReturn(true);
 
-        $sqlRepo = new SqLiteArticleRepo($connectionMock);
+        $sqlRepo = new SqLiteArticleRepo($connectionMock, new DummyLogger());
         // Свойства пользователя точно такие,как и в описании мока
         $sqlRepo->save(new Article(
             new UUID("123e4567-e89b-12d3-a456-426614174000"),
@@ -47,7 +48,7 @@ class ArticleRepoTest extends TestCase
         );
         $statementMock->method('fetch')->willReturn(false);
 
-        $sqlRepo=new SqLiteArticleRepo($connectionMock);
+        $sqlRepo=new SqLiteArticleRepo($connectionMock, new DummyLogger());
 
         $this->expectException(ArticleNotFoundException::class);
         $this->expectExceptionMessage("Cannot find article: 123e4567-e89b-12d3-a456-426614174000");
@@ -76,7 +77,7 @@ class ArticleRepoTest extends TestCase
             'text'=> 'text'
         ]);
 
-        $sqlRepo=new SqLiteArticleRepo($connectionMock);
+        $sqlRepo=new SqLiteArticleRepo($connectionMock, new DummyLogger());
 
         $user = new Article(
             new UUID("123e4567-e89b-12d3-a456-426614174000"),
@@ -110,7 +111,7 @@ class ArticleRepoTest extends TestCase
             'text'=> 'text'
         ]);
 
-        $sqlRepo=new SqLiteArticleRepo($connectionMock);
+        $sqlRepo=new SqLiteArticleRepo($connectionMock, new DummyLogger());
 
         $user = new Article(
             new UUID("123e4567-e89b-12d3-a456-426614174000"),

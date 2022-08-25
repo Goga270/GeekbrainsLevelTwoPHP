@@ -11,21 +11,25 @@ use George\HomeTask\Http\Request;
 use George\HomeTask\Http\Response;
 use George\HomeTask\Http\SuccessResponse;
 use George\HomeTask\Repositories\Comments\CommentsRepositiryInterface;
+use Psr\Log\LoggerInterface;
 
 class CreateComment implements ActionInterface
 {
     public function __construct(
-        private CommentsRepositiryInterface $commentsRepository
+        private CommentsRepositiryInterface $commentsRepository,
+        private LoggerInterface $logger
     ) {}
 
     public function handle(Request $request): Response
     {
+        $this->logger->info("Started created new comment");
         $id = UUID::random();
         try{
             $authorId = $request->jsonBodyField('authorId');
             $articleId = $request->jsonBodyField('articleId');
             $text = $request->jsonBodyField('text');
         }catch (HttpException $e){
+            $this->logger->warning($e->getMessage(), ["error"=> $e]);
             return new ErorrResponse($e->getMessage());
         }
 

@@ -8,22 +8,27 @@ use George\HomeTask\Exceptions\CommentNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqLiteCommentsRepo implements CommentsRepositiryInterface {
 
     //Поле где хранится конект к базе данных с данными.
     private PDO $connection;
+    private LoggerInterface $logger;
 
     /**
      * @param PDO $connection
+     * @param LoggerInterface $logger
      */
-    public function __construct(PDO $connection)
+    public function __construct(PDO $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
+        $this->logger = $logger;
     }
 
     public function save(Comment $comment): void
     {
+        $this->logger->info("Started saving the comment to database");
         // Добавили поле username в запрос
         $statement = $this->connection->prepare(
             'INSERT INTO comments (uuid, authorId, articleId, text)
@@ -88,6 +93,7 @@ class SqLiteCommentsRepo implements CommentsRepositiryInterface {
     {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         if (false === $result) {
+            $this->logger->warning("Cannot find the comment by $id ");
             throw new CommentNotFoundException(
                 "Cannot find comment: $id"
             );
