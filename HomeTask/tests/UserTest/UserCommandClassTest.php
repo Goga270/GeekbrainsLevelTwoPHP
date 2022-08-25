@@ -9,6 +9,7 @@ use George\HomeTask\Exceptions\ArgumentsException;
 use George\HomeTask\Exceptions\CommandException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class UserCommandClassTest extends TestCase
@@ -48,7 +49,7 @@ class UserCommandClassTest extends TestCase
 
         $obj = $this->getRepo();
 
-        $userCom = new CreateUserCommand($obj);
+        $userCom = new CreateUserCommand($obj, new DummyLogger());
 
         $userCom->handle(new Arguments([
             'username' => 'Ivan',
@@ -81,7 +82,7 @@ class UserCommandClassTest extends TestCase
             }
         };
 
-        $userCommand = new CreateUserCommand($userRepo);
+        $userCommand = new CreateUserCommand($userRepo, new DummyLogger());
 
         $this->expectException(CommandException::class);
         $this->expectExceptionMessage("User already exists: ivan228");

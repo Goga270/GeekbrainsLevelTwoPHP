@@ -10,17 +10,20 @@ use George\HomeTask\Http\Request;
 use George\HomeTask\Http\Response;
 use George\HomeTask\Http\SuccessResponse;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class FindByUsername implements ActionInterface
 {
     // Нам понадобится репозиторий пользователей,
     // внедряем его контракт в качестве зависимости
     public function __construct(
-        private UsersRepositoryInterface $usersRepository
+        private UsersRepositoryInterface $usersRepository,
+        private LoggerInterface $logger
     ) {}
     // Функция, описанная в контракте
     public function handle(Request $request): Response
     {
+        $this->logger->info("Started finding user by username");
         try {
     // Пытаемся получить искомое имя пользователя из запроса
             $username = $request->query('username');
@@ -28,6 +31,7 @@ class FindByUsername implements ActionInterface
     // Если в запросе нет параметра username -
     // возвращаем неуспешный ответ,
     // сообщение об ошибке берём из описания исключения
+            $this->logger->warning($e->getMessage(), ["error"=> $e]);
             return new ErorrResponse($e->getMessage());
         }
         try {
@@ -36,6 +40,7 @@ class FindByUsername implements ActionInterface
         } catch (UserNotFoundException $e) {
     // Если пользователь не найден -
     // возвращаем неуспешный ответ
+            $this->logger->warning($e->getMessage(), ["error"=> $e]);
             return new ErorrResponse($e->getMessage());
         }
     // Возвращаем успешный ответ

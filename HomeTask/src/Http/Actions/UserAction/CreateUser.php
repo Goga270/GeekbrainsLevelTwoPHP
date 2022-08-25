@@ -13,6 +13,7 @@ use George\HomeTask\Http\Request;
 use George\HomeTask\Http\Response;
 use George\HomeTask\Http\SuccessResponse;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class CreateUser implements ActionInterface
 {
@@ -20,7 +21,8 @@ class CreateUser implements ActionInterface
     // Нам понадобится репозиторий пользователей,
     // внедряем его контракт в качестве зависимости
     public function __construct(
-        private UsersRepositoryInterface $usersRepository
+        private UsersRepositoryInterface $usersRepository,
+        private LoggerInterface $logger
     ) {}
 
     /**
@@ -28,12 +30,14 @@ class CreateUser implements ActionInterface
      */
     public function handle(Request $request): Response
     {
+        $this->logger->info("Started created new user");
         $id = UUID::random();
         try{
             $first_name = $request->jsonBodyField('first_name');
             $username = $request->jsonBodyField('username');
             $last_name = $request->jsonBodyField('last_name');
         }catch (HttpException $exception){
+            $this->logger->warning($exception->getMessage(), ["error"=> $exception]);
             return new ErorrResponse($exception->getMessage());
         }
 

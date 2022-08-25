@@ -8,6 +8,8 @@ use George\HomeTask\Http\Actions\ArticleAction\DeleteArticleById;
 use George\HomeTask\Http\Actions\ArticleAction\FindArticleById;
 use George\HomeTask\Http\Actions\CommentAction\CreateComment;
 use George\HomeTask\Http\Actions\CommentAction\FindCommentById;
+use George\HomeTask\Http\Actions\LikeAction\CreateArticleLike;
+use George\HomeTask\Http\Actions\LikeAction\CreateCommentLike;
 use George\HomeTask\Http\Actions\LikeAction\CreateLike;
 use George\HomeTask\Http\Actions\LikeAction\FindLikesByArticle;
 use George\HomeTask\Http\Actions\UserAction\CreateUser;
@@ -18,16 +20,18 @@ use George\HomeTask\Http\SuccessResponse;
 use George\HomeTask\Repositories\Articles\SqLiteArticleRepo;
 use George\HomeTask\Repositories\Comments\SqLiteCommentsRepo;
 use George\HomeTask\Repositories\Users\SqLiteUserRepo;
+use Psr\Log\LoggerInterface;
 
 http_response_code(200);
 
 $request = new Request($_GET, $_SERVER, file_get_contents("php://input"));
 $container = require_once __DIR__.'/bootstrap.php';
-
+$logger = $container->get(LoggerInterface::class);
 try {
     $path = $request->path();
-} catch (\George\HomeTask\Exceptions\HttpException $exception) {
-    (new ErorrResponse($exception->getMessage()))->send();
+} catch (\George\HomeTask\Exceptions\HttpException $e) {
+    $logger->error($e->getMessage());
+    (new ErorrResponse($e->getMessage()))->send();
     return;
 }
 
@@ -38,6 +42,7 @@ try {
     // Возвращаем неудачный ответ,
     // если по какой-то причине
     // не можем получить метод
+    $logger->error($e->getMessage());
     (new ErorrResponse($e->getMessage()))->send();
     return;
 }
@@ -50,14 +55,15 @@ $routes = [
         '/show/user' => FindByUsername::class,
         '/show/article' =>FindArticleById::class,
         '/show/comment' =>FindCommentById::class,
-        '/show/ArticleLikes' => FindLikesByArticle::class
     ],
     'POST' => [
         // Добавили новый маршрут
         '/create/user' => CreateUser::class,
         '/create/article' => CreateArticle::class,
         '/create/comment' => CreateComment::class,
-        '/create/like' => CreateLike::class
+        '/create/article/like' => CreateArticleLike::class,
+        '/create/comment/like' => CreateCommentLike::class
+
     ],
     'DELETE' => [
         '/delete/article' => DeleteArticleById::class
@@ -67,12 +73,14 @@ $routes = [
 // Если у нас нет маршрутов для метода запроса -
 // возвращаем неуспешный ответ
 if (!array_key_exists($method, $routes)) {
+    $logger->error('Method Not found');
     (new ErorrResponse('Method Not found'))->send();
     return;
 }
 
 // Ищем маршрут среди маршрутов для этого метода
 if (!array_key_exists($path, $routes[$method])) {
+    $logger->error('Route Not found');
     (new ErorrResponse('Route Not found'))->send();
     return;
 }
@@ -85,6 +93,7 @@ $action = $container->get($actionClassName);
 try {
     $response = $action->handle($request);
 } catch (AppException $e) {
+    $this->logger->warning($e->getMessage());
     (new ErorrResponse($e->getMessage()))->send();
 }
 

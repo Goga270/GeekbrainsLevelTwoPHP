@@ -26,7 +26,7 @@ use George\HomeTask\Exceptions\InvalidArgumentException;
 $container = require_once __DIR__.'/bootstrap.php';
 $command = $container->get(CreateUserCommand::class);
 try{
-    /*$command->handle(Arguments::fromArgv($argv));*/
+    $command->handle(Arguments::fromArgv($argv));
     $likeRepo = new SqLiteLikesRepo($con);
 }catch (AppException $e){
     echo $e->getMessage();

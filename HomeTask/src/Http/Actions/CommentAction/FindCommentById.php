@@ -11,24 +11,29 @@ use George\HomeTask\Http\Request;
 use George\HomeTask\Http\Response;
 use George\HomeTask\Http\SuccessResponse;
 use George\HomeTask\Repositories\Comments\CommentsRepositiryInterface;
+use Psr\Log\LoggerInterface;
 
 class FindCommentById implements ActionInterface
 {
     public function __construct(
-        private CommentsRepositiryInterface $commentsRepository
+        private CommentsRepositiryInterface $commentsRepository,
+        private LoggerInterface $logger
     ) {}
 
     public function handle(Request $request): Response
     {
+        $this->logger->info("Started finding a comment by Uuid");
         try{
             $id = $request->query('id');
         }catch (HttpException $e){
+            $this->logger->warning($e->getMessage(), ["error"=> $e]);
             return new ErorrResponse($e->getMessage());
         }
 
         try{
             $comment = $this->commentsRepository->get(new UUID($id));
         }catch (CommentNotFoundException $e){
+            $this->logger->warning($e->getMessage(), ["error"=> $e]);
             return new ErorrResponse($e->getMessage());
         }
 

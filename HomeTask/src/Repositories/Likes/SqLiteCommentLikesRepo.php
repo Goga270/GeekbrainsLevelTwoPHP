@@ -3,44 +3,56 @@
 namespace George\HomeTask\Repositories\Likes;
 
 use George\HomeTask\Blog\Article\Article;
+use George\HomeTask\Blog\Comment\Comment;
+use George\HomeTask\Blog\Like\CommentLike;
 use George\HomeTask\Blog\Like\Like;
 use George\HomeTask\Blog\User\User;
 use George\HomeTask\Common\UUID;
+use George\HomeTask\Exceptions\InvalidArgumentException;
+use George\HomeTask\Exceptions\LikeExsistException;
 use George\HomeTask\Exceptions\LikeNotFoundException;
 use PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
-class SqLiteLikesRepo implements LikesRepositoryInterface
+class SqLiteCommentLikesRepo
 {
-
     private PDO $connection;
+    private LoggerInterface $logger;
 
     /**
      * @param PDO $connection
+     * @param LoggerInterface $logger
      */
-    public function __construct(PDO $connection)
+    public function __construct(PDO $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
+        $this->logger = $logger;
     }
 
     public function save(Like $like): void
     {
+        $this->logger->info("Started saving the comment like to database");
         // Добавили поле username в запрос
         $statement = $this->connection->prepare(
-            'INSERT INTO article_likes (uuid, articleUuid, userUuid)
-            VALUES (:uuid, :articleUuid, :userUuid)'
+            'INSERT INTO comment_likes (uuid, commentUuid, userUuid)
+            VALUES (:uuid, :commentUuid, :userUuid)'
         );
         $statement->execute([
             ':uuid'=> (string)$like->getLike(),
-            ':articleUuid'=> $like->getArticle(),
+            ':commentUuid'=> $like->getComment(),
             ':userUuid'=> $like->getUser()
         ]);
     }
 
-    public function get(UUID $uuid): Like
+    /**
+     * @throws LikeNotFoundException
+     * @throws InvalidArgumentException
+     */
+    public function get(UUID $uuid): CommentLike
     {
         $statement = $this->connection->prepare(
-            'SELECT * FROM article_likes WHERE uuid = :uuid'
+            'SELECT * FROM comment_likes WHERE uuid = :uuid'
         );
         $statement->execute([
             ':uuid' => (string)$uuid,
@@ -66,12 +78,12 @@ class SqLiteLikesRepo implements LikesRepositoryInterface
     /**
      * @throws LikeNotFoundException
      */
-    public function getAllByArticle(UUID $id): iterable
+    public function getAllByComment(UUID $id): iterable
     {
         $likes = [];
 
         $statement = $this->connection->prepare(
-            'SELECT * FROM article_likes WHERE articleUuid = :uuid'
+            'SELECT * FROM comment_likes WHERE commentUuid = :uuid'
         );
         $statement->execute([
             ':uuid' => (string)$id,
@@ -79,16 +91,21 @@ class SqLiteLikesRepo implements LikesRepositoryInterface
         return $this->getAllLikes($statement);
     }
 
-    private function getLike(PDOStatement $statement, string $id): Like
+    /**
+     * @throws LikeNotFoundException
+     * @throws InvalidArgumentException
+     */
+    private function getLike(PDOStatement $statement, string $id): CommentLike
     {
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         if (false === $result) {
+            $this->logger->warning("Cannot find the comment like by $id");
             throw new LikeNotFoundException(
                 "Cannot find like: $id"
             );
         }
         // Создаём объект пользователя с полем username
-        return new Like(new UUID($result['uuid']), new UUID($result['articleUuid']), new UUID($result['userUuid']));
+        return new CommentLike(new UUID($result['uuid']), new UUID($result['articleUuid']), new UUID($result['userUuid']));
     }
 
     private function getAllLikes(PDOStatement $statement): iterable
@@ -97,14 +114,26 @@ class SqLiteLikesRepo implements LikesRepositoryInterface
         $result = $statement->fetchAll(PDO::FETCH_ASSOC);
         if (false === $result) {
             throw new LikeNotFoundException(
-                "Cannot find likes on this article."
+                "Cannot find likes on this comment."
             );
         }
         return $likes;
     }
 
-    public function likeExist(Article $article, User $user): void
+    public function likeExist(Comment $comment, User $user): void
     {
+        $statement = $this->connection->prepare(
+            'SELECT * FROM comment_likes WHERE commentUuid = :commentUuid AND userUuid = :userUuid'
+        );
+        $statement->execute([
+            ':commentUuid' => (string)$comment->getId(),
+            ':userUuid' => (string)$user->getId()
+        ]);
 
+        $isExisted = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if($isExisted){
+            throw new LikeExsistException("The users like for this comment already exist");
+        }
     }
 }

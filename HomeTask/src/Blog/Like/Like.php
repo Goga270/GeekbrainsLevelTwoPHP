@@ -7,18 +7,15 @@ use George\HomeTask\Common\UUID;
 class Like
 {
     private UUID $like;
-    private UUID $article;
     private UUID $user;
 
     /**
      * @param UUID $like
-     * @param UUID $article
      * @param UUID $user
      */
-    public function __construct(UUID $like, UUID $article, UUID $user)
+    public function __construct(UUID $like, UUID $user)
     {
         $this->like = $like;
-        $this->article = $article;
         $this->user = $user;
     }
 
@@ -41,22 +38,6 @@ class Like
     /**
      * @return UUID
      */
-    public function getArticle(): UUID
-    {
-        return $this->article;
-    }
-
-    /**
-     * @param UUID $article
-     */
-    public function setArticle(UUID $article): void
-    {
-        $this->article = $article;
-    }
-
-    /**
-     * @return UUID
-     */
     public function getUser(): UUID
     {
         return $this->user;
@@ -71,7 +52,7 @@ class Like
     }
 
     public function __toString(): string{
-        return ("id=".$this->like.", "."articleId=".$this->article.", "."userId=".$this->user.PHP_EOL);
+        return ("id=".$this->like.","."userId=".$this->user.PHP_EOL);
     }
 
 

@@ -7,6 +7,7 @@ use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\ArgumentsException;
 use George\HomeTask\Exceptions\CommandException;
 use George\HomeTask\Repositories\Comments\CommentsRepositiryInterface;
+use George\HomeTask\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class CommentCommandClassTest extends TestCase
@@ -52,7 +53,7 @@ class CommentCommandClassTest extends TestCase
 
         $obj = $this->getRepo();
 
-        $userCom = new CreateCommentCommand($obj);
+        $userCom = new CreateCommentCommand($obj, new DummyLogger());
 
         $userCom->handle(
             new Arguments([

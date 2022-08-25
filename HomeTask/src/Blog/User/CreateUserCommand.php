@@ -8,13 +8,15 @@ use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\CommandException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
+use Psr\Log\LoggerInterface;
 
 class CreateUserCommand
 {
     private UsersRepositoryInterface $usersRepository;
 
-    public function __construct(UsersRepositoryInterface $usersRepository) {
+    public function __construct(UsersRepositoryInterface $usersRepository, LoggerInterface $logger) {
         $this->usersRepository = $usersRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -23,6 +25,7 @@ class CreateUserCommand
      * @throws CommandException
      */
     public function handle(Arguments $arguments):void{
+        $this->logger->info("Started created new user by command line");
         $id = UUID::random();
         $name = new Name($arguments->getArg('first_name'), $arguments->getArg('last_name'));
         $username = $arguments->getArg('username');
