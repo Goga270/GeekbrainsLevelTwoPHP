@@ -8,12 +8,14 @@ use George\HomeTask\Blog\Like\Like;
 use George\HomeTask\Blog\User\User;
 use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\ArticleNotFoundException;
+use George\HomeTask\Exceptions\AuthException;
 use George\HomeTask\Exceptions\HttpException;
 use George\HomeTask\Exceptions\InvalidArgumentException;
 use George\HomeTask\Exceptions\LikeExsistException;
 use George\HomeTask\Exceptions\LikeNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Http\Actions\ActionInterface;
+use George\HomeTask\Http\Auth\Interfaces\TokenAuthenticationInterface;
 use George\HomeTask\Http\ErorrResponse;
 use George\HomeTask\Http\Request;
 use George\HomeTask\Http\Response;
@@ -28,9 +30,9 @@ class CreateArticleLike implements ActionInterface
 {
     public function __construct(
         private ArticlesRepositoryInterface $articlesRepository,
-        private UsersRepositoryInterface $usersRepository,
         private SqLiteArticleLikesRepo $likesRepository,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private TokenAuthenticationInterface $authentication,
     ) {}
 
     /**
@@ -43,7 +45,6 @@ class CreateArticleLike implements ActionInterface
 
         try{
             $articleId = new UUID($request->jsonBodyField('articleId'));
-            $userId = new UUID($request->jsonBodyField('userId'));
         }catch (HttpException|InvalidArgumentException $e){
             $this->logger->warning($e->getMessage(), ["error"=> $e]);
             return new ErorrResponse($e->getMessage());
@@ -57,14 +58,11 @@ class CreateArticleLike implements ActionInterface
         }
 
         try{
-            $user = $this->usersRepository->get($userId);
-        }catch (UserNotFoundException $e){
+            $user = $this->authentication->user($request);
+        }catch (AuthException $e){
             $this->logger->warning($e->getMessage(), ["error"=> $e]);
-            return new ErorrResponse("No user created");
+            return new ErorrResponse($e->getMessage());
         }
-
-        /*$articleLikes = $this->likesRepository->getAllByArticle($articleId);
-        print_r($articleLikes);*/
 
         try {
             $this->likesRepository->likeExist($article,$user);
@@ -73,10 +71,12 @@ class CreateArticleLike implements ActionInterface
             return new ErorrResponse($e->getMessage());
         }
 
+
+
         $this->likesRepository->save(new ArticleLike(
             $id,
             $articleId,
-            $userId
+            $user->getId()
         ));
 
         return new SuccessResponse([

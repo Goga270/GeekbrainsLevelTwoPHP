@@ -6,6 +6,8 @@ use George\HomeTask\Exceptions\AppException;
 use George\HomeTask\Http\Actions\ArticleAction\CreateArticle;
 use George\HomeTask\Http\Actions\ArticleAction\DeleteArticleById;
 use George\HomeTask\Http\Actions\ArticleAction\FindArticleById;
+use George\HomeTask\Http\Actions\Auth\LogIn;
+use George\HomeTask\Http\Actions\Auth\LogOut;
 use George\HomeTask\Http\Actions\CommentAction\CreateComment;
 use George\HomeTask\Http\Actions\CommentAction\FindCommentById;
 use George\HomeTask\Http\Actions\LikeAction\CreateArticleLike;
@@ -62,7 +64,9 @@ $routes = [
         '/create/article' => CreateArticle::class,
         '/create/comment' => CreateComment::class,
         '/create/article/like' => CreateArticleLike::class,
-        '/create/comment/like' => CreateCommentLike::class
+        '/create/comment/like' => CreateCommentLike::class,
+        '/logIn'=> LogIn::class,
+        '/logOut'=> LogOut::class
 
     ],
     'DELETE' => [

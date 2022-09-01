@@ -5,7 +5,9 @@ namespace George\HomeTask\Blog\User;
 use George\HomeTask\Common\Arguments;
 use George\HomeTask\Common\Name;
 use George\HomeTask\Common\UUID;
+use George\HomeTask\Exceptions\ArgumentsException;
 use George\HomeTask\Exceptions\CommandException;
+use George\HomeTask\Exceptions\InvalidArgumentException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
 use Psr\Log\LoggerInterface;
@@ -20,8 +22,8 @@ class CreateUserCommand
     }
 
     /**
-     * @throws \George\HomeTask\Exceptions\InvalidArgumentException
-     * @throws \George\HomeTask\Exceptions\ArgumentsException
+     * @throws InvalidArgumentException
+     * @throws ArgumentsException
      * @throws CommandException
      */
     public function handle(Arguments $arguments):void{
@@ -29,12 +31,16 @@ class CreateUserCommand
         $id = UUID::random();
         $name = new Name($arguments->getArg('first_name'), $arguments->getArg('last_name'));
         $username = $arguments->getArg('username');
+        $password = $arguments->getArg('password');
 
         if($this->UserExist($username)){
             throw new CommandException("User already exists: $username");
         }
 
-        $this->usersRepository->save(new User($id, $username, $name));
+
+        $user = User::createFrom($username, $password, $name);
+
+        $this->usersRepository->save($user);
     }
 
     public function UserExist($username):bool{

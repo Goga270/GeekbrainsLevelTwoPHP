@@ -9,12 +9,14 @@ use George\HomeTask\Blog\Like\CommentLike;
 use George\HomeTask\Blog\User\User;
 use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\ArticleNotFoundException;
+use George\HomeTask\Exceptions\AuthException;
 use George\HomeTask\Exceptions\HttpException;
 use George\HomeTask\Exceptions\InvalidArgumentException;
 use George\HomeTask\Exceptions\LikeExsistException;
 use George\HomeTask\Exceptions\LikeNotFoundException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use George\HomeTask\Http\Actions\ActionInterface;
+use George\HomeTask\Http\Auth\Interfaces\TokenAuthenticationInterface;
 use George\HomeTask\Http\ErorrResponse;
 use George\HomeTask\Http\Request;
 use George\HomeTask\Http\Response;
@@ -30,9 +32,9 @@ class CreateCommentLike implements ActionInterface
 {
     public function __construct(
         private CommentsRepositiryInterface $commentsRepositiry,
-        private UsersRepositoryInterface $usersRepository,
         private SqLiteCommentLikesRepo $likesRepository,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private TokenAuthenticationInterface $authentication
     ) {}
 
     /**
@@ -45,7 +47,6 @@ class CreateCommentLike implements ActionInterface
 
         try{
             $commentId = new UUID($request->jsonBodyField('commentId'));
-            $userId = new UUID($request->jsonBodyField('userId'));
         }catch (HttpException|InvalidArgumentException $e){
             $this->logger->warning($e->getMessage(), ["error"=> $e]);
             return new ErorrResponse($e->getMessage());
@@ -59,10 +60,10 @@ class CreateCommentLike implements ActionInterface
         }
 
         try{
-            $user = $this->usersRepository->get($userId);
-        }catch (UserNotFoundException $e){
+            $user = $this->authentication->user($request);
+        }catch (AuthException $e){
             $this->logger->warning($e->getMessage(), ["error"=> $e]);
-            return new ErorrResponse("No user created");
+            return new ErorrResponse($e->getMessage());
         }
 
         try {
@@ -75,7 +76,7 @@ class CreateCommentLike implements ActionInterface
         $this->likesRepository->save(new CommentLike(
             $id,
             $commentId,
-            $userId
+            $user->getId()
         ));
 
         return new SuccessResponse([

@@ -8,6 +8,7 @@ use George\HomeTask\Exceptions\AuthException;
 use George\HomeTask\Exceptions\HttpException;
 use George\HomeTask\Exceptions\InvalidArgumentException;
 use George\HomeTask\Exceptions\UserNotFoundException;
+use George\HomeTask\Http\Auth\Interfaces\IdentificationInterface;
 use George\HomeTask\Http\Request;
 use George\HomeTask\Repositories\Users\UsersRepositoryInterface;
 

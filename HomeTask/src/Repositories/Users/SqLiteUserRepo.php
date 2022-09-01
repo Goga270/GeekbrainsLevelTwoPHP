@@ -31,12 +31,16 @@ class SqLiteUserRepo implements UsersRepositoryInterface
         $this->logger->info("Started saving the user to database");
         // Добавили поле username в запрос
         $statement = $this->connection->prepare(
-            'INSERT INTO users (uuid, username, first_name, last_name)
-            VALUES (:uuid, :username, :first_name, :last_name)'
+            'INSERT INTO users (uuid, username, password, first_name, last_name)
+            VALUES (:uuid, :username, :password, :first_name, :last_name) 
+            ON CONFLICT (uuid) DO UPDATE SET
+            first_name = :first_name,
+            last_name = :last_name'
         );
         $statement->execute([
             ':uuid' => (string)$user->getId(),
             ':username' => $user->getUsername(),
+            ':password' => $user->getHashedPassword(),
             ':first_name' => $user->getName()->getFirstName(),
             ':last_name' => $user->getName()->getLastName()]);
     }
@@ -83,7 +87,7 @@ class SqLiteUserRepo implements UsersRepositoryInterface
             );
         }
         // Создаём объект пользователя с полем username
-        return new User(new UUID($result['uuid']), $result['username'], new Name($result['first_name'], $result['last_name']));
+        return new User(new UUID($result['uuid']), $result['username'], $result['password'], new Name($result['first_name'], $result['last_name']));
     }
 
 }

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 class UserClassTest extends TestCase
 {
     public function testConstructor():void{
-        $arg = new User(new UUID("123e4567-e89b-12d3-a456-426614174000"),"admin1", new Name("first_name1", "last_name1"));
+        $arg = new User(new UUID("123e4567-e89b-12d3-a456-426614174000"),"admin1", "test", new Name("first_name1", "last_name1"));
         $value = (string)$arg;
         $this->assertEquals("id=123e4567-e89b-12d3-a456-426614174000, name=first_name1, lastname=last_name1, username=admin1",trim($value));
     }
@@ -18,7 +18,7 @@ class UserClassTest extends TestCase
      */
     private function getUser(): User
     {
-        return new User(UUID::random(),"admin", new Name("first_name", "last_name"));
+        return new User(UUID::random(),"admin", "test", new Name("first_name", "last_name"));
     }
 
     private function UsersProviderForMethodSetUserName():iterable{

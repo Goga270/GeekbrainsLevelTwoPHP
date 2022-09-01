@@ -9,6 +9,10 @@ use George\HomeTask\Blog\Comment\CreateCommentCommand;
 use George\HomeTask\Blog\Like\Like;
 use George\HomeTask\Blog\User\CreateUserCommand;
 use George\HomeTask\Blog\User\User;
+use George\HomeTask\Commands\PopulateDB\PopulateDB;
+use George\HomeTask\Commands\Posts\DeletePost;
+use George\HomeTask\Commands\Users\CreateUser;
+use George\HomeTask\Commands\Users\UpdateUser;
 use George\HomeTask\Common\Arguments;
 use George\HomeTask\Common\Name;
 use George\HomeTask\Common\SomeClass;
@@ -22,13 +26,27 @@ use George\HomeTask\Repositories\Likes\SqLiteLikesRepo;
 use George\HomeTask\Repositories\Users\InMemoryUsersRepo;
 use George\HomeTask\Repositories\Users\SqLiteUserRepo;
 use George\HomeTask\Exceptions\InvalidArgumentException;
+use Symfony\Component\Console\Application;
 
 $container = require_once __DIR__.'/bootstrap.php';
-$command = $container->get(CreateUserCommand::class);
+
 try{
-    $command->handle(Arguments::fromArgv($argv));
-    $likeRepo = new SqLiteLikesRepo($con);
-}catch (AppException $e){
+    $application = new Application();
+
+    $commandClasses = [
+        CreateUser::class,
+        DeletePost::class,
+        UpdateUser::class,
+        PopulateDB::class
+        ];
+
+    foreach ($commandClasses as $class){
+        $command = $container->get($class);
+        $application->add($command);
+    }
+
+    $application->run();
+}catch (AppException|Exception $e){
     echo $e->getMessage();
 }
 
