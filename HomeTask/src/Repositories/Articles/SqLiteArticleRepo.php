@@ -7,9 +7,11 @@ use George\HomeTask\Blog\User\User;
 use George\HomeTask\Common\Name;
 use George\HomeTask\Common\UUID;
 use George\HomeTask\Exceptions\ArticleNotFoundException;
+use George\HomeTask\Exceptions\ArticleRepositoryException;
 use George\HomeTask\Exceptions\InvalidArgumentException;
 use George\HomeTask\Exceptions\UserNotFoundException;
 use PDO;
+use PDOException;
 use PDOStatement;
 use Psr\Log\LoggerInterface;
 
@@ -107,11 +109,18 @@ class SqLiteArticleRepo implements ArticlesRepositoryInterface
         return new Article(new UUID($result['uuid']), new UUID($result['authorUuid']), $result['title'], $result['text']);
     }
 
+    /**
+     * @throws ArticleRepositoryException
+     */
     public function deleteById(UUID $id){
-        $statement = $this->connection->prepare('DELETE FROM articles WHERE uuid = :id');
+        try {
+            $statement = $this->connection->prepare('DELETE FROM articles WHERE uuid = :id');
 
-        $statement->execute([
-            ':id' => (string)$id,
-        ]);
+            $statement->execute([
+                ':id' => (string)$id,
+            ]);
+        }catch (PDOException $e){
+            throw new ArticleRepositoryException($e->getMessage(),(int)$e->getCode());
+        }
     }
 }

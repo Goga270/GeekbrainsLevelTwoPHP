@@ -55,6 +55,7 @@ class UserCommandClassTest extends TestCase
             'username' => 'Ivan',
             'first_name' => 'Ivan',
             'last_name' => 'Nikitin',
+            'password' => 'test'
         ]));
 
         $this->assertTrue($obj->getCallback());
@@ -73,12 +74,12 @@ class UserCommandClassTest extends TestCase
 
             public function get(UUID $uuid): User
             {
-                return new User(new UUID('123e4567-e89b-12d3-a456-426614174000'), 'ivan228', new Name('Ivan', 'Nikitin'));
+                return new User(new UUID('123e4567-e89b-12d3-a456-426614174000'), 'ivan228', "test", new Name('Ivan', 'Nikitin'));
             }
 
             public function getByUsername(string $username): User
             {
-                return new User(new UUID('123e4567-e89b-12d3-a456-426614174000'), 'ivan228', new Name('Ivan', 'Nikitin'));
+                return new User(new UUID('123e4567-e89b-12d3-a456-426614174000'), 'ivan228', "test", new Name('Ivan', 'Nikitin'));
             }
         };
 
@@ -91,6 +92,7 @@ class UserCommandClassTest extends TestCase
             'username' => 'ivan228',
             'first_name' => 'Ivan',
             'last_name' => 'Nikitin',
+            'password' => 'test'
         ]));
     }
 

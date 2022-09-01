@@ -36,12 +36,15 @@ class CreateUser implements ActionInterface
             $first_name = $request->jsonBodyField('first_name');
             $username = $request->jsonBodyField('username');
             $last_name = $request->jsonBodyField('last_name');
+            $password = $request->jsonBodyField('password');
         }catch (HttpException $exception){
             $this->logger->warning($exception->getMessage(), ["error"=> $exception]);
             return new ErorrResponse($exception->getMessage());
         }
 
-        $this->usersRepository->save(new User($id, $username, new Name($first_name,$last_name)));
+        $user = User::createFrom($username, $password, new Name($first_name, $last_name));
+
+        $this->usersRepository->save($user);
         return new SuccessResponse([
             "message"=> "User successful created with Id= $id",
         ]);
